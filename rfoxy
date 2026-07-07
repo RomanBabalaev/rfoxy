@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FPV Частотная сетка — DVR KEY</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0b1119;
+            min-height: 100vh;
+            padding: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 18px 20px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header h1 small {
+            font-size: 12px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .header .badge {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.15);
+            padding: 1px 10px;
+            border-radius: 14px;
+            font-size: 10px;
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .header .selected-count {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 3px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .header .selected-count span {
+            color: #fbbf24;
+            font-weight: 700;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .controls label {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .controls select {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3px 12px;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .controls select:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .controls select:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+
+        .controls select option {
+            background: #1a2a3a;
+            color: white;
+        }
+
+        .clear-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 3px 14px;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .band-selector {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .band-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 3px 12px;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: monospace;
+        }
+
+        .band-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .band-btn.active {
+            background: rgba(52, 211, 153, 0.12);
+            border-color: #34d399;
+            color: #34d399;
+        }
+
+        /* ===== СЕТКА ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+            gap: 5px;
+        }
+
+        .freq-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 6px 4px 4px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: 0.15s ease;
+            cursor: pointer;
+            text-align: center;
+            position: relative;
+        }
+
+        .freq-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .freq-card.good {
+            border-left: 3px solid #34d399;
+            background: rgba(52, 211, 153, 0.05);
+        }
+
+        .freq-card.mid {
+            border-left: 3px solid #fb923c;
+            background: rgba(251, 146, 60, 0.05);
+        }
+
+        .freq-card.bad {
+            border-left: 3px solid #f87171;
+            background: rgba(248, 113, 113, 0.05);
+            opacity: 0.5;
+        }
+
+        .freq-card.selected {
+            border: 2px solid #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.05);
+        }
+
+        .freq-card.selected .channel {
+            color: #fbbf24;
+        }
+
+        .freq-card.disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .freq-card .freq {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.45);
+            font-family: monospace;
+            line-height: 1.1;
+        }
+
+        .freq-card .freq small {
+            font-size: 7px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .freq-card .channel {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            font-family: monospace;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+        }
+
+        .freq-card .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+
+        .status-dot.good { background: #34d399; }
+        .status-dot.mid { background: #fb923c; }
+        .status-dot.bad { background: #f87171; }
+        .status-dot.none { background: rgba(255, 255, 255, 0.08); }
+        .status-dot.selected { background: #fbbf24; }
+
+        .freq-card .order-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #fbbf24;
+            color: #0b1119;
+            font-size: 8px;
+            font-weight: 700;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+        }
+
+        /* ===== ЛЕГЕНДА ===== */
+        .legend {
+            display: flex;
+            gap: 12px;
+            padding: 4px 0 10px 0;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            margin-bottom: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .legend-item .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot.good { background: #34d399; }
+        .dot.mid { background: #fb923c; }
+        .dot.bad { background: #f87171; }
+        .dot.selected { background: #fbbf24; }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 768px) {
+            .app { padding: 14px 16px; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 4px; }
+            .freq-card .channel { font-size: 14px; }
+            .freq-card .freq { font-size: 9px; }
+            .header h1 { font-size: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .app { padding: 10px 12px; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 3px; }
+            .freq-card { padding: 4px 3px 3px; border-radius: 6px; }
+            .freq-card .channel { font-size: 12px; }
+            .freq-card .freq { font-size: 8px; }
+            .freq-card .freq small { font-size: 6px; }
+            .freq-card .status-dot { width: 5px; height: 5px; }
+            .header h1 { font-size: 14px; }
+            .controls select { font-size: 10px; padding: 2px 8px; }
+            .clear-btn { font-size: 10px; padding: 2px 10px; }
+            .selected-count { font-size: 10px; padding: 2px 10px; }
+            .legend { gap: 6px; padding: 3px 0 6px 0; }
+            .legend-item { font-size: 8px; }
+            .legend-item .dot { width: 6px; height: 6px; }
+            .band-btn { font-size: 10px; padding: 2px 8px; }
+            .freq-card .order-badge { width: 14px; height: 14px; font-size: 7px; top: -4px; right: -4px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <!-- Header -->
+    <div class="header">
+        <h1>
+            📻 FPV
+            <small>DVR KEY</small>
+            <span class="badge">12 бэндов</span>
+        </h1>
+        <div class="controls">
+            <label for="gapSelect">Мин. разнос:</label>
+            <select id="gapSelect">
+                <option value="20">20 МГц</option>
+                <option value="30">30 МГц</option>
+                <option value="40">40 МГц</option>
+                <option value="50" selected>50 МГц</option>
+                <option value="60">60 МГц</option>
+                <option value="80">80 МГц</option>
+                <option value="100">100 МГц</option>
+            </select>
+            <button class="clear-btn" id="clearBtn">✕ Очистить</button>
+            <span class="selected-count">Выбрано: <span id="selectedCount">0</span>/10</span>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <span class="legend-item"><span class="dot good"></span> Отлично</span>
+        <span class="legend-item"><span class="dot mid"></span> Так себе</span>
+        <span class="legend-item"><span class="dot bad"></span> Конфликт</span>
+        <span class="legend-item"><span class="dot selected"></span> Выбран</span>
+    </div>
+
+    <!-- Band Selector -->
+    <div class="band-selector" id="bandSelector">
+        <button class="band-btn active" data-band="all">Все</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid" id="gridContainer"></div>
+</div>
+
+<script>
+    (function() {
+        // ============================================================
+        //  FPV ЧАСТОТНАЯ СЕТКА — DVR KEY (12 бэндов)
+        // ============================================================
+        const FPV_BANDS = {
+            'A': [5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725],
+            'B': [5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866],
+            'E': [5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945],
+            'F': [5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880],
+            'R': [5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917],
+            'L': [5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621],
+            'J': [4867, 4884, 4921, 4958, 4995, 5032, 5069, 5099],
+            'X': [4990, 5020, 5050, 5080, 5110, 5140, 5170, 5200],
+            'U': [5325, 5348, 5366, 5384, 5402, 5420, 5438, 5456],
+            'I': [5333, 5373, 5413, 5453, 5493, 5533, 5573, 5613],
+            'K': [5960, 5980, 6000, 6020, 6040, 6060, 6080, 6100],
+            'Z': [6002, 6028, 6054, 6080, 6106, 6132, 6158, 6184]
+        };
+
+        const MAX_SELECTED = 10;
+
+        function buildStations() {
+            const list = [];
+            for (const [band, freqs] of Object.entries(FPV_BANDS)) {
+                freqs.forEach((freq, idx) => {
+                    list.push({
+                        id: `${band}${idx + 1}`,
+                        band: band,
+                        channel: idx + 1,
+                        freq: freq / 1000,
+                        freqRaw: freq,
+                    });
+                });
+            }
+            return list;
+        }
+
+        const ALL = buildStations();
+
+        // DOM
+        const grid = document.getElementById('gridContainer');
+        const gapSelect = document.getElementById('gapSelect');
+        const bandSelector = document.getElementById('bandSelector');
+        const clearBtn = document.getElementById('clearBtn');
+        const selectedCountSpan = document.getElementById('selectedCount');
+
+        let currentBand = 'all';
+        let selectedIds = [];
+
+        // ============================================================
+        //  ЛОГИКА
+        // ============================================================
+        function getStatus(stations, selectedIds, minGap) {
+            const selected = stations.filter(s => selectedIds.includes(s.id));
+            
+            return stations.map(s => {
+                let status = 'none';
+                let diff = null;
+                const isSelected = selectedIds.includes(s.id);
+
+                if (selected.length > 0 && !isSelected) {
+                    let minDistance = Infinity;
+                    for (const sel of selected) {
+                        if (s.id === sel.id) continue;
+                        const d = Math.abs(s.freqRaw - sel.freqRaw);
+                        if (d < minDistance) minDistance = d;
+                    }
+
+                    if (minDistance !== Infinity) {
+                        diff = minDistance;
+                        if (minDistance >= minGap) {
+                            status = 'good';
+                        } else if (minDistance >= minGap * 0.5) {
+                            status = 'mid';
+                        } else {
+                            status = 'bad';
+                        }
+                    }
+                }
+
+                let order = -1;
+                if (isSelected) {
+                    order = selectedIds.indexOf(s.id) + 1;
+                }
+
+                return { ...s, status, diff, isSelected, order };
+            });
+        }
+
+        // ============================================================
+        //  РЕНДЕР
+        // ============================================================
+        function render() {
+            const minGap = parseInt(gapSelect.value, 10);
+
+            let pool = ALL;
+            if (currentBand !== 'all') {
+                pool = ALL.filter(s => s.band === currentBand);
+            }
+
+            selectedIds = selectedIds.filter(id => pool.some(s => s.id === id));
+
+            const data = getStatus(pool, selectedIds, minGap);
+
+            selectedCountSpan.textContent = selectedIds.length;
+
+            const isFull = selectedIds.length >= MAX_SELECTED;
+
+            grid.innerHTML = '';
+
+            data.forEach(s => {
+                const card = document.createElement('div');
+                
+                let cls = '';
+                if (s.isSelected) cls = 'selected';
+                else if (s.status === 'good') cls = 'good';
+                else if (s.status === 'mid') cls = 'mid';
+                else if (s.status === 'bad') cls = 'bad';
+                
+                if (isFull && !s.isSelected) cls += ' disabled';
+                
+                card.className = `freq-card ${cls}`;
+
+                card.addEventListener('click', () => {
+                    if (isFull && !s.isSelected) return;
+                    
+                    if (s.isSelected) {
+                        selectedIds = selectedIds.filter(id => id !== s.id);
+                    } else {
+                        selectedIds.push(s.id);
+                    }
+                    render();
+                });
+
+                let dot = '';
+                if (s.isSelected) dot = '<span class="status-dot selected"></span>';
+                else if (s.status === 'good') dot = '<span class="status-dot good"></span>';
+                else if (s.status === 'mid') dot = '<span class="status-dot mid"></span>';
+                else if (s.status === 'bad') dot = '<span class="status-dot bad"></span>';
+                else dot = '<span class="status-dot none"></span>';
+
+                let orderBadge = '';
+                if (s.isSelected && s.order > 0) {
+                    orderBadge = `<span class="order-badge">${s.order}</span>`;
+                }
+
+                card.innerHTML = `
+                    <div class="channel">${s.id}</div>
+                    <div class="freq">${s.freq.toFixed(3)} <small>МГц</small></div>
+                    ${dot}
+                    ${orderBadge}
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // ============================================================
+        //  ОЧИСТКА
+        // ============================================================
+        clearBtn.addEventListener('click', function() {
+            selectedIds = [];
+            render();
+        });
+
+        // ============================================================
+        //  БЭНДЫ
+        // ============================================================
+        function buildBands() {
+            const order = ['A', 'B', 'E', 'F', 'R', 'L', 'J', 'X', 'U', 'I', 'K', 'Z'];
+
+            bandSelector.innerHTML = '<button class="band-btn active" data-band="all">Все</button>';
+            for (const band of order) {
+                if (FPV_BANDS[band]) {
+                    const btn = document.createElement('button');
+                    btn.className = 'band-btn';
+                    btn.dataset.band = band;
+                    btn.textContent = band;
+                    bandSelector.appendChild(btn);
+                }
+            }
+
+            bandSelector.querySelectorAll('.band-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    bandSelector.querySelectorAll('.band-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentBand = this.dataset.band;
+                    selectedIds = [];
+                    render();
+                });
+            });
+        }
+
+        // ============================================================
+        //  СОБЫТИЯ
+        // ============================================================
+        gapSelect.addEventListener('change', () => {
+            render();
+        });
+
+        // ============================================================
+        //  СТАРТ
+        // ============================================================
+        buildBands();
+        render();
+
+        console.log('📻 FPV сетка DVR KEY загружена');
+        console.log(`📡 Всего каналов: ${ALL.length}`);
+        console.log(`💡 Можно выбрать до ${MAX_SELECTED} каналов`);
+
+    })();
+</script>
+
+</body>
+</html>
