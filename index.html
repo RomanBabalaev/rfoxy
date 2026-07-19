@@ -28,13 +28,14 @@
             border-radius: 20px;
             padding: 18px 20px 20px;
             border: 1px solid rgba(255, 255, 255, 0.06);
+            position: relative;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
             gap: 8px;
         }
@@ -136,36 +137,102 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        .band-selector {
+        /* ===== УПРАВЛЕНИЕ БЭНДАМИ ===== */
+        .band-controls {
             display: flex;
-            gap: 3px;
+            gap: 4px;
             flex-wrap: wrap;
+            padding: 4px 0 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .band-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 2px 10px 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: monospace;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .band-toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .band-toggle.active {
+            border-color: #34d399;
+            color: #34d399;
+            background: rgba(52, 211, 153, 0.06);
+        }
+
+        .band-toggle.hidden {
+            border-color: #f87171;
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.06);
+            opacity: 0.5;
+        }
+
+        .band-toggle .toggle-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .band-toggle.active .toggle-dot {
+            background: #34d399;
+        }
+
+        .band-toggle.hidden .toggle-dot {
+            background: #f87171;
+        }
+
+        .band-toggle .count-badge {
+            font-size: 8px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.15);
+            margin-left: 2px;
+        }
+
+        /* ===== ЛЕГЕНДА ===== */
+        .legend {
+            display: flex;
+            gap: 12px;
+            padding: 4px 0 10px 0;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             margin-bottom: 10px;
         }
 
-        .band-btn {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-            padding: 3px 12px;
-            color: rgba(255, 255, 255, 0.35);
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: monospace;
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
         }
 
-        .band-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.6);
+        .legend-item .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
 
-        .band-btn.active {
-            background: rgba(52, 211, 153, 0.12);
-            border-color: #34d399;
-            color: #34d399;
-        }
+        .dot.good { background: #34d399; }
+        .dot.mid { background: #fb923c; }
+        .dot.bad { background: #f87171; }
+        .dot.selected { background: #fbbf24; }
 
         /* ===== СЕТКА ===== */
         .grid {
@@ -183,6 +250,7 @@
             cursor: pointer;
             text-align: center;
             position: relative;
+            z-index: 2;
         }
 
         .freq-card:hover {
@@ -275,35 +343,124 @@
             font-family: monospace;
         }
 
-        /* ===== ЛЕГЕНДА ===== */
-        .legend {
-            display: flex;
-            gap: 12px;
-            padding: 4px 0 10px 0;
-            flex-wrap: wrap;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            margin-bottom: 10px;
+        /* ===== ПОДСКАЗКА-ТУР ===== */
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.3);
+        .tour-overlay.show {
+            opacity: 1;
+            pointer-events: all;
         }
 
-        .legend-item .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
+        .tour-overlay svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
 
-        .dot.good { background: #34d399; }
-        .dot.mid { background: #fb923c; }
-        .dot.bad { background: #f87171; }
-        .dot.selected { background: #fbbf24; }
+        .tour-overlay svg mask rect {
+            fill: white;
+        }
+
+        .tour-overlay svg mask .hole {
+            fill: black;
+        }
+
+        .tour-overlay svg .bg {
+            fill: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+        }
+
+        .tour-highlight-ring {
+            position: fixed;
+            z-index: 1001;
+            pointer-events: none;
+            border-radius: 16px;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.5), 0 0 40px rgba(251, 191, 36, 0.12);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .tour-highlight-ring.show {
+            opacity: 1;
+        }
+
+        .tour-box {
+            position: fixed;
+            z-index: 1002;
+            max-width: 420px;
+            width: 90%;
+            background: rgba(16, 24, 36, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 22px 26px 20px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.4s ease;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .tour-box.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .tour-box .icon {
+            font-size: 30px;
+            margin-bottom: 6px;
+        }
+
+        .tour-box h2 {
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .tour-box p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 4px;
+        }
+
+        .tour-box .tour-step {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.15);
+            margin-top: 6px;
+        }
+
+        .tour-box .tour-btn {
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 30px;
+            padding: 6px 28px;
+            color: #fbbf24;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .tour-box .tour-btn:hover {
+            background: rgba(251, 191, 36, 0.2);
+        }
 
         /* ===== АДАПТИВ ===== */
         @media (max-width: 768px) {
@@ -312,6 +469,11 @@
             .freq-card .channel { font-size: 14px; }
             .freq-card .freq { font-size: 9px; }
             .header h1 { font-size: 16px; }
+            .band-toggle { font-size: 10px; padding: 1px 8px 1px 6px; }
+            .band-controls { gap: 3px; }
+            .tour-box { padding: 18px 20px 16px; max-width: 360px; }
+            .tour-box h2 { font-size: 16px; }
+            .tour-box p { font-size: 12px; }
         }
 
         @media (max-width: 480px) {
@@ -329,20 +491,54 @@
             .legend { gap: 6px; padding: 3px 0 6px 0; }
             .legend-item { font-size: 8px; }
             .legend-item .dot { width: 6px; height: 6px; }
-            .band-btn { font-size: 10px; padding: 2px 8px; }
             .freq-card .order-badge { width: 14px; height: 14px; font-size: 7px; top: -4px; right: -4px; }
+            .band-toggle { font-size: 9px; padding: 1px 6px 1px 4px; }
+            .band-toggle .toggle-dot { width: 5px; height: 5px; }
+            .band-controls { gap: 2px; padding: 2px 0 4px 0; }
+            .tour-box { padding: 14px 16px 14px; max-width: 300px; }
+            .tour-box h2 { font-size: 15px; }
+            .tour-box p { font-size: 11px; }
+            .tour-box .tour-btn { font-size: 13px; padding: 5px 20px; }
         }
     </style>
 </head>
 <body>
 
 <div class="app">
+    <!-- Затемнение с "дыркой" -->
+    <div class="tour-overlay" id="tourOverlay">
+        <svg id="tourSvg" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <mask id="tourMask">
+                    <rect width="100%" height="100%" fill="white" />
+                    <rect class="hole" id="holeRect" x="0" y="0" width="0" height="0" rx="16" fill="black" />
+                </mask>
+            </defs>
+            <rect class="bg" width="100%" height="100%" mask="url(#tourMask)" />
+        </svg>
+    </div>
+
+    <!-- Рамка подсветки -->
+    <div class="tour-highlight-ring" id="tourHighlightRing"></div>
+
+    <!-- Окно подсказки -->
+    <div class="tour-box" id="tourBox">
+        <div class="icon">🎯</div>
+        <h2>Управление бэндами</h2>
+        <p>Кнопки <strong>A–Z</strong> скрывают или показывают целые группы каналов.</p>
+        <p style="font-size:12px; color:rgba(255,255,255,0.25);">
+            🟢 Активен · 🔴 Скрыт
+        </p>
+        <div class="tour-step">Шаг 1 из 2</div>
+        <button class="tour-btn" id="tourNextBtn">Понятно, да?</button>
+    </div>
+
     <!-- Header -->
     <div class="header">
         <h1>
             📻 FPV
             <small>DVR KEY</small>
-            <span class="badge">12 бэндов</span>
+            <span class="badge">13 бэндов</span>
         </h1>
         <div class="controls">
             <label for="gapSelect">Мин. разнос:</label>
@@ -356,7 +552,7 @@
                 <option value="100">100 МГц</option>
             </select>
             <button class="clear-btn" id="clearBtn">✕ Очистить</button>
-            <span class="selected-count">Выбрано: <span id="selectedCount">0</span>/10</span>
+            <span class="selected-count">Выбрано: <span id="selectedCount">0</span>/16</span>
         </div>
     </div>
 
@@ -368,10 +564,8 @@
         <span class="legend-item"><span class="dot selected"></span> Выбран</span>
     </div>
 
-    <!-- Band Selector -->
-    <div class="band-selector" id="bandSelector">
-        <button class="band-btn active" data-band="all">Все</button>
-    </div>
+    <!-- Band Controls -->
+    <div class="band-controls" id="bandControls"></div>
 
     <!-- Grid -->
     <div class="grid" id="gridContainer"></div>
@@ -380,7 +574,8 @@
 <script>
     (function() {
         // ============================================================
-        //  FPV ЧАСТОТНАЯ СЕТКА — DVR KEY (12 бэндов)
+        //  FPV ЧАСТОТНАЯ СЕТКА — DVR KEY (13 бэндов)
+        //  ПОРЯДОК: A, B, E, F, R, L, H, J, X, U, I, K, Z
         // ============================================================
         const FPV_BANDS = {
             'A': [5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725],
@@ -389,6 +584,7 @@
             'F': [5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880],
             'R': [5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917],
             'L': [5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621],
+            'H': [5653, 5693, 5733, 5773, 5813, 5853, 5893, 5933],
             'J': [4867, 4884, 4921, 4958, 4995, 5032, 5069, 5099],
             'X': [4990, 5020, 5050, 5080, 5110, 5140, 5170, 5200],
             'U': [5325, 5348, 5366, 5384, 5402, 5420, 5438, 5456],
@@ -397,7 +593,32 @@
             'Z': [6002, 6028, 6054, 6080, 6106, 6132, 6158, 6184]
         };
 
-        const MAX_SELECTED = 10;
+        // ============================================================
+        //  МАКСИМУМ — 16 КАНАЛОВ
+        // ============================================================
+        const MAX_SELECTED = 16;
+
+        // ============================================================
+        //  СОСТОЯНИЕ БЭНДОВ — фильтрация по умолчанию: Z и I скрыты
+        //  Остальные (включая X и H) — видны
+        // ============================================================
+        let bandStates = {
+            'A': true,
+            'B': true,
+            'E': true,
+            'F': true,
+            'R': true,
+            'L': true,
+            'H': true,
+            'J': true,
+            'X': true,
+            'U': true,
+            'I': false,
+            'K': true,
+            'Z': false
+        };
+
+        const BAND_ORDER = ['A', 'B', 'E', 'F', 'R', 'L', 'H', 'J', 'X', 'U', 'I', 'K', 'Z'];
 
         function buildStations() {
             const list = [];
@@ -415,17 +636,112 @@
             return list;
         }
 
-        const ALL = buildStations();
+        const ALL_STATIONS = buildStations();
 
         // DOM
         const grid = document.getElementById('gridContainer');
         const gapSelect = document.getElementById('gapSelect');
-        const bandSelector = document.getElementById('bandSelector');
+        const bandControls = document.getElementById('bandControls');
         const clearBtn = document.getElementById('clearBtn');
         const selectedCountSpan = document.getElementById('selectedCount');
 
-        let currentBand = 'all';
+        const tourOverlay = document.getElementById('tourOverlay');
+        const tourSvg = document.getElementById('tourSvg');
+        const holeRect = document.getElementById('holeRect');
+        const tourHighlightRing = document.getElementById('tourHighlightRing');
+        const tourBox = document.getElementById('tourBox');
+        const tourNextBtn = document.getElementById('tourNextBtn');
+
         let selectedIds = [];
+        let tourActive = false;
+
+        // ============================================================
+        //  ТУР
+        // ============================================================
+        function updateHole(element) {
+            const rect = element.getBoundingClientRect();
+            const padding = 12;
+
+            holeRect.setAttribute('x', rect.left - padding);
+            holeRect.setAttribute('y', rect.top - padding);
+            holeRect.setAttribute('width', rect.width + padding * 2);
+            holeRect.setAttribute('height', rect.height + padding * 2);
+
+            tourHighlightRing.style.top = (rect.top - padding) + 'px';
+            tourHighlightRing.style.left = (rect.left - padding) + 'px';
+            tourHighlightRing.style.width = (rect.width + padding * 2) + 'px';
+            tourHighlightRing.style.height = (rect.height + padding * 2) + 'px';
+            tourHighlightRing.classList.add('show');
+
+            const boxWidth = Math.min(420, window.innerWidth * 0.9);
+            const boxTop = rect.bottom + 16;
+            const boxLeft = Math.max(16, (window.innerWidth - boxWidth) / 2);
+
+            tourBox.style.top = boxTop + 'px';
+            tourBox.style.left = boxLeft + 'px';
+            tourBox.style.maxWidth = boxWidth + 'px';
+        }
+
+        function showStep1() {
+            tourActive = true;
+            tourOverlay.classList.add('show');
+
+            const target = document.getElementById('bandControls');
+            updateHole(target);
+
+            tourBox.classList.add('show');
+            tourBox.innerHTML = `
+                <div class="icon">🎯</div>
+                <h2>Управление бэндами</h2>
+                <p>Кнопки <strong>A–Z</strong> скрывают или показывают целые группы каналов.</p>
+                <p style="font-size:12px; color:rgba(255,255,255,0.25);">
+                    🟢 Активен · 🔴 Скрыт
+                </p>
+                <div class="tour-step">Шаг 1 из 2</div>
+                <button class="tour-btn" id="tourNextBtn">Понятно, да?</button>
+            `;
+
+            document.getElementById('tourNextBtn').addEventListener('click', showStep2);
+        }
+
+        function showStep2() {
+            const firstCard = document.querySelector('.freq-card');
+            
+            if (!firstCard) {
+                hideTour();
+                return;
+            }
+
+            updateHole(firstCard);
+
+            tourBox.innerHTML = `
+                <div class="icon">👆</div>
+                <h2>Выбор каналов</h2>
+                <p>Кликайте по <strong>каналам</strong> — они подсветятся и получат номер.</p>
+                <p>Приложение автоматически покажет совместимость:</p>
+                <p style="font-size:12px; color:rgba(255,255,255,0.3);">
+                    🟢 Отлично · 🟠 Так себе · 🔴 Конфликт
+                </p>
+                <div class="tour-step">Шаг 2 из 2</div>
+                <button class="tour-btn" id="tourFinishBtn">Понятно, да?</button>
+            `;
+
+            document.getElementById('tourFinishBtn').addEventListener('click', hideTour);
+        }
+
+        function hideTour() {
+            tourActive = false;
+            tourOverlay.classList.remove('show');
+            tourHighlightRing.classList.remove('show');
+            tourBox.classList.remove('show');
+        }
+
+        // ============================================================
+        //  ПОЛУЧЕНИЕ АКТИВНЫХ СТАНЦИЙ
+        // ============================================================
+        function getActiveStations() {
+            return ALL_STATIONS.filter(s => bandStates[s.band] !== false);
+        }
 
         // ============================================================
         //  ЛОГИКА
@@ -473,10 +789,7 @@
         function render() {
             const minGap = parseInt(gapSelect.value, 10);
 
-            let pool = ALL;
-            if (currentBand !== 'all') {
-                pool = ALL.filter(s => s.band === currentBand);
-            }
+            let pool = getActiveStations();
 
             selectedIds = selectedIds.filter(id => pool.some(s => s.id === id));
 
@@ -536,6 +849,66 @@
         }
 
         // ============================================================
+        //  БЭНД-КОНТРОЛЛЕРЫ
+        // ============================================================
+        function renderBandControls() {
+            bandControls.innerHTML = '';
+            
+            const allVisible = BAND_ORDER.every(b => bandStates[b] !== false);
+            const allHidden = BAND_ORDER.every(b => bandStates[b] === false);
+            
+            const toggleAll = document.createElement('span');
+            toggleAll.className = 'band-toggle';
+            if (allVisible) {
+                toggleAll.classList.add('active');
+                toggleAll.innerHTML = '◉ Все';
+            } else if (allHidden) {
+                toggleAll.classList.add('hidden');
+                toggleAll.innerHTML = '◌ Все';
+            } else {
+                toggleAll.innerHTML = '◐ Все';
+            }
+            toggleAll.addEventListener('click', function() {
+                if (allVisible) {
+                    for (const b of BAND_ORDER) {
+                        bandStates[b] = false;
+                    }
+                } else {
+                    for (const b of BAND_ORDER) {
+                        bandStates[b] = true;
+                    }
+                }
+                selectedIds = [];
+                renderBandControls();
+                render();
+            });
+            bandControls.appendChild(toggleAll);
+
+            for (const band of BAND_ORDER) {
+                const isVisible = bandStates[band] !== false;
+                const count = ALL_STATIONS.filter(s => s.band === band).length;
+                
+                const btn = document.createElement('span');
+                btn.className = `band-toggle ${isVisible ? 'active' : 'hidden'}`;
+                btn.innerHTML = `
+                    <span class="toggle-dot"></span>
+                    ${band}
+                    <span class="count-badge">${count}</span>
+                `;
+                btn.addEventListener('click', function() {
+                    bandStates[band] = !isVisible;
+                    selectedIds = selectedIds.filter(id => {
+                        const s = ALL_STATIONS.find(st => st.id === id);
+                        return s && bandStates[s.band] !== false;
+                    });
+                    renderBandControls();
+                    render();
+                });
+                bandControls.appendChild(btn);
+            }
+        }
+
+        // ============================================================
         //  ОЧИСТКА
         // ============================================================
         clearBtn.addEventListener('click', function() {
@@ -544,49 +917,42 @@
         });
 
         // ============================================================
-        //  БЭНДЫ
-        // ============================================================
-        function buildBands() {
-            const order = ['A', 'B', 'E', 'F', 'R', 'L', 'J', 'X', 'U', 'I', 'K', 'Z'];
-
-            bandSelector.innerHTML = '<button class="band-btn active" data-band="all">Все</button>';
-            for (const band of order) {
-                if (FPV_BANDS[band]) {
-                    const btn = document.createElement('button');
-                    btn.className = 'band-btn';
-                    btn.dataset.band = band;
-                    btn.textContent = band;
-                    bandSelector.appendChild(btn);
-                }
-            }
-
-            bandSelector.querySelectorAll('.band-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    bandSelector.querySelectorAll('.band-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentBand = this.dataset.band;
-                    selectedIds = [];
-                    render();
-                });
-            });
-        }
-
-        // ============================================================
         //  СОБЫТИЯ
         // ============================================================
         gapSelect.addEventListener('change', () => {
             render();
         });
 
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && tourActive) {
+                hideTour();
+            }
+        });
+
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (tourActive) {
+                    const target = document.querySelector('.freq-card') || document.getElementById('bandControls');
+                    if (target) updateHole(target);
+                }
+            }, 200);
+        });
+
         // ============================================================
         //  СТАРТ
         // ============================================================
-        buildBands();
+        renderBandControls();
         render();
 
+        setTimeout(showStep1, 500);
+
         console.log('📻 FPV сетка DVR KEY загружена');
-        console.log(`📡 Всего каналов: ${ALL.length}`);
+        console.log(`📡 Всего каналов: ${ALL_STATIONS.length}`);
         console.log(`💡 Можно выбрать до ${MAX_SELECTED} каналов`);
+        console.log('📋 Порядок бэндов: ' + BAND_ORDER.join(', '));
+        console.log('🔽 Скрытые бэнды: I, Z');
 
     })();
 </script>
